@@ -48,6 +48,15 @@ export function saveRows(key: string, rows: EntryRow[]): void {
   }
 }
 
+// 事务式整体落库：调用方先把涉及模块的新状态全部算好，这里一次写透。
+// 写不进去（如存储超限）时内存缓存也不换，等于什么都没发生，保证失败整条回退。
+export function saveAll(next: Record<string, EntryRow[]>): void {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  }
+  cache = next
+}
+
 export function resetRows(key: string): EntryRow[] {
   const rows = clone(SEED_ROWS[key] ?? [])
   saveRows(key, rows)

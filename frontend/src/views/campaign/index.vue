@@ -85,9 +85,9 @@ const meta = moduleMeta('campaign')
 const columns = ["活动编号", "宣传主题", "宣传方式", "覆盖村组", "执行人员", "活动日期", "受众人数", "活动状态"]
 const actions = ["开展活动", "确认完成", "取消活动"]
 const statuses = ["待开展", "进行中", "已完成", "已取消"]
-const stats = [{"label": "本月活动数", "value": 0}, {"label": "已完成数", "value": 0}, {"label": "覆盖人次", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
+const statsSource = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
@@ -98,6 +98,33 @@ const statusSummary = computed(() =>
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
 )
+
+// 统计卡按全量数据实时重算，不随筛选条件变：已取消的活动不计入本月批次与覆盖人次，
+// 历史已完成活动的受众人数按原值保留。
+const stats = computed(() => {
+  const now = new Date()
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const live = statsSource.value.filter((row) => String(row.status) !== '已取消')
+  return [
+    {
+      label: '本月活动数',
+      value: live.filter((row) => String(row['活动日期'] ?? '').startsWith(month)).length,
+    },
+    {
+      label: '已完成数',
+      value: statsSource.value.filter((row) => String(row.status) === '已完成').length,
+    },
+    {
+      label: '覆盖人次',
+      value: live.reduce((sum, row) => sum + toCount(row['受众人数']), 0),
+    },
+  ]
+})
+
+function toCount(value: unknown): number {
+  const parsed = Number.parseInt(String(value ?? ''), 10)
+  return Number.isFinite(parsed) ? parsed : 0
+}
 
 function resetFilters() {
   filters.value = {}
@@ -128,6 +155,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    statsSource.value = listEntries(meta.key).items
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '防火宣传列表读取失败'
   }

@@ -68,4 +68,6 @@ npm run build
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
+- 取消防火宣传活动是级联事务：活动指标（覆盖村组、受众人数）清零并封档为「已取消」，
+  值勤排班里按活动日期协办的台账跟着撤销一份；取消与完成以先落库状态为准，失败整条回退。
 - 想回到初始数据：清掉浏览器里 `forest-fire-patrol:entries` 这一项，或调用 `resetModule(模块)`。
