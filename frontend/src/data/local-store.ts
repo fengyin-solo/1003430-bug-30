@@ -41,10 +41,21 @@ export function listRows(key: string): EntryRow[] {
 }
 
 export function saveRows(key: string, rows: EntryRow[]): void {
-  const next = { ...allRows(), [key]: rows }
+  saveAll({ ...allRows(), [key]: rows })
+}
+
+// 整库一次性落库：跨模块事务（如取消活动连带撤销值勤台账）只能走这里，
+// 写不进 localStorage 时把内存态一并回退，避免缓存和持久层各说各话。
+export function saveAll(next: Record<string, EntryRow[]>): void {
+  const prev = cache
   cache = next
-  if (typeof window !== 'undefined' && window.localStorage) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    }
+  } catch (error) {
+    cache = prev
+    throw error
   }
 }
 

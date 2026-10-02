@@ -74,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  campaignStats,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -85,7 +86,7 @@ const meta = moduleMeta('campaign')
 const columns = ["活动编号", "宣传主题", "宣传方式", "覆盖村组", "执行人员", "活动日期", "受众人数", "活动状态"]
 const actions = ["开展活动", "确认完成", "取消活动"]
 const statuses = ["待开展", "进行中", "已完成", "已取消"]
-const stats = [{"label": "本月活动数", "value": 0}, {"label": "已完成数", "value": 0}, {"label": "覆盖人次", "value": 0}]
+const stats = ref<{ label: string; value: number }[]>(campaignStats())
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -128,6 +129,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    stats.value = campaignStats()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '防火宣传列表读取失败'
   }

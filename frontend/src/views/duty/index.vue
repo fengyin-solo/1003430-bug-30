@@ -84,7 +84,7 @@ import type { EntryRow } from '@/data/types'
 const meta = moduleMeta('duty')
 const columns = ["排班编号", "值勤日期", "值勤时段", "值勤岗位", "值勤人员", "接班人员", "交接记录", "排班状态"]
 const actions = ["确认排班", "记录交接", "申请调班"]
-const statuses = ["待确认", "已确认", "值勤中", "已交接", "已调班"]
+const statuses = ["待确认", "已确认", "值勤中", "已交接", "已调班", "已撤销"]
 const stats = [{"label": "今日值勤人数", "value": 0}, {"label": "待交接次数", "value": 0}, {"label": "调班申请数", "value": 0}]
 
 const rows = ref<EntryRow[]>([])

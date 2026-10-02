@@ -18,6 +18,8 @@ export type ModuleMeta = {
   actions: string[]
   actionTargets: Record<string, string>
   metrics: string[]
+  // 终态状态：落库后任何动作都不再生效，冲突时以先落库状态为准。
+  terminalStatuses?: string[]
 }
 
 export type PageResult = {
